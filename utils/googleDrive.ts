@@ -206,6 +206,7 @@ export async function uploadToGoogleDrive(
   }
 }
 
+// Convert to Google Docs
 export async function convertToGoogleDocs(
   fileId: string,
   accessToken: string
@@ -231,13 +232,22 @@ export async function convertToGoogleDocs(
     );
 
     if (!response.ok) {
-      throw new Error(`Google Drive API error (${response.status})`);
+      const errorResponse = await response.text();
+      console.error("Google Docs conversion error:", errorResponse);
+      throw new Error(`Google Drive API error (${response.status}): ${errorResponse}`);
     }
 
     const result = await response.json();
+    
+    // Explicitly format the webViewLink to ensure it's correct
+    if (result.id) {
+      // Create a correctly formatted Google Docs URL
+      result.webViewLink = `https://docs.google.com/document/d/${result.id}/edit`;
+    }
+    
     return result;
   } catch (error) {
-    console.log("Error converting to Google Docs:", error);
+    console.error("Error converting to Google Docs:", error);
     throw error;
   }
 }

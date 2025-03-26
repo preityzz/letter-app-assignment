@@ -77,14 +77,13 @@ export default function RichTextEditor({ documentId = "" }: EditorProps) {
               }
             }
           } else {
-         
             if (editor) {
               editor.commands.setContent(PLACEHOLDER_CONTENT);
             }
           }
         } catch (error) {
           console.log("Error loading document:", error);
-        
+
           if (editor) {
             editor.commands.setContent(PLACEHOLDER_CONTENT);
           }
@@ -95,7 +94,6 @@ export default function RichTextEditor({ documentId = "" }: EditorProps) {
 
       loadDocument();
     } else {
-   
       if (editor && editor.isEmpty) {
         editor.commands.setContent(PLACEHOLDER_CONTENT);
       }
@@ -112,7 +110,6 @@ export default function RichTextEditor({ documentId = "" }: EditorProps) {
         throw new Error("You must be logged in to save drafts");
       }
 
-     
       const contentToSave =
         content === PLACEHOLDER_CONTENT && editor && editor.isEmpty
           ? PLACEHOLDER_CONTENT
@@ -131,7 +128,6 @@ export default function RichTextEditor({ documentId = "" }: EditorProps) {
         docRef = doc(db, "letters", documentId);
         await updateDoc(docRef, letterData);
       } else {
-  
         docRef = doc(collection(db, "letters"));
         await setDoc(docRef, {
           ...letterData,
@@ -148,48 +144,46 @@ export default function RichTextEditor({ documentId = "" }: EditorProps) {
     }
   };
 
- const saveToGoogleDrive = async () => {
-   try {
-     setDriveStatus("loading");
-     setSaveStatus("Uploading to Google Drive...");
 
-     // Get fresh access token with Drive scope
-     const accessToken = await getGoogleDriveToken();
-     console.log("Got access token, starting upload...");
 
-     // Upload HTML content
-     const fileName = title || "Untitled Letter";
-     const uploadResult = await uploadToGoogleDrive(
-       content,
-       fileName,
-       accessToken
-     );
-     console.log("Upload successful, converting to Google Docs...");
+  const saveToGoogleDrive = async () => {
+    try {
+      setDriveStatus("loading");
+      setSaveStatus("Uploading to Google Drive...");
 
-     // Convert to Google Docs format
-     const docResult = await convertToGoogleDocs(uploadResult.id, accessToken);
+      // Get fresh access token with Drive scope
+      const accessToken = await getGoogleDriveToken();
 
-     // Store the web view link
-     if (docResult.webViewLink) {
-       setDriveDocUrl(docResult.webViewLink);
-       console.log("Google Doc ready at:", docResult.webViewLink);
-     }
+      // Upload HTML content
+      const fileName = title || "Untitled Letter";
+      const uploadResult = await uploadToGoogleDrive(
+        content,
+        fileName,
+        accessToken
+      );
 
-     setSaveStatus("Saved to Google Drive");
-     setDriveStatus("success");
-   } catch (error) {
-     console.error("Error saving to Google Drive:", error);
+      // Convert to Google Docs format
+      const docResult = await convertToGoogleDocs(uploadResult.id, accessToken);
 
-     // Show a more user-friendly error message
-     setSaveStatus(
-       error instanceof Error
-         ? `Error: ${error.message}`
-         : "Error saving to Google Drive"
-     );
+      // Ensure we have a valid document URL
+      let docUrl = null;
+      if (docResult.id) {
+        // Use the explicitly formatted URL to avoid any issues
+        docUrl = `https://docs.google.com/document/d/${docResult.id}/edit`;
+        setDriveDocUrl(docUrl);
+      } else if (docResult.webViewLink) {
+        // Fallback to the API-provided URL if necessary
+        setDriveDocUrl(docResult.webViewLink);
+      }
 
-     setDriveStatus("error");
-   }
- };
+      setSaveStatus("Saved to Google Drive");
+      setDriveStatus("success");
+    } catch (error) {
+      console.error("Error saving to Google Drive:", error);
+      setSaveStatus("Error saving to Google Drive");
+      setDriveStatus("error");
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
