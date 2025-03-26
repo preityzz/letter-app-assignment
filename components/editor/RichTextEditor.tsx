@@ -148,37 +148,48 @@ export default function RichTextEditor({ documentId = "" }: EditorProps) {
     }
   };
 
-  const saveToGoogleDrive = async () => {
-    try {
-      setDriveStatus("loading");
-      setSaveStatus("Uploading to Google Drive...");
+ const saveToGoogleDrive = async () => {
+   try {
+     setDriveStatus("loading");
+     setSaveStatus("Uploading to Google Drive...");
 
-  
-      const accessToken = await getGoogleDriveToken();
+     // Get fresh access token with Drive scope
+     const accessToken = await getGoogleDriveToken();
+     console.log("Got access token, starting upload...");
 
-      const fileName = title || "Untitled Letter";
-      const uploadResult = await uploadToGoogleDrive(
-        content,
-        fileName,
-        accessToken
-      );
+     // Upload HTML content
+     const fileName = title || "Untitled Letter";
+     const uploadResult = await uploadToGoogleDrive(
+       content,
+       fileName,
+       accessToken
+     );
+     console.log("Upload successful, converting to Google Docs...");
 
-   
-      const docResult = await convertToGoogleDocs(uploadResult.id, accessToken);
+     // Convert to Google Docs format
+     const docResult = await convertToGoogleDocs(uploadResult.id, accessToken);
 
-      if (docResult.webViewLink) {
-        setDriveDocUrl(docResult.webViewLink);
-      }
+     // Store the web view link
+     if (docResult.webViewLink) {
+       setDriveDocUrl(docResult.webViewLink);
+       console.log("Google Doc ready at:", docResult.webViewLink);
+     }
 
-      setSaveStatus("Saved to Google Drive");
-      setDriveStatus("success");
-    } catch (error) {
-      console.log("Error saving to Google Drive:", error);
-      setSaveStatus("Error saving to Google Drive");
-      setDriveStatus("error");
-    }
-  };
+     setSaveStatus("Saved to Google Drive");
+     setDriveStatus("success");
+   } catch (error) {
+     console.error("Error saving to Google Drive:", error);
 
+     // Show a more user-friendly error message
+     setSaveStatus(
+       error instanceof Error
+         ? `Error: ${error.message}`
+         : "Error saving to Google Drive"
+     );
+
+     setDriveStatus("error");
+   }
+ };
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
