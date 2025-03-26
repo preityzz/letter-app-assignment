@@ -41,7 +41,6 @@ export default function Home() {
   );
 }
 
-// Components extracted for better modularity
 
 function LoadingScreen() {
   return (
