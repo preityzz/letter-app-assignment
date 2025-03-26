@@ -1,12 +1,23 @@
-// Get Drive API URLs from environment variables
 const DRIVE_API_URL =
   process.env.NEXT_PUBLIC_GOOGLE_DRIVE_API_URL ||
   "https://www.googleapis.com/drive/v3";
+const DRIVE_UPLOAD_API_URL =
+  process.env.NEXT_PUBLIC_GOOGLE_DRIVE_UPLOAD_API_URL ||
+  "https://www.googleapis.com/upload/drive/v3";
 
 // List files from Google Drive
 export async function listGoogleDriveFiles(
   accessToken: string
-): Promise<{ id: string; name: string; mimeType: string; createdTime: string; modifiedTime: string; webViewLink: string }[]> {
+): Promise<
+  {
+    id: string;
+    name: string;
+    mimeType: string;
+    createdTime: string;
+    modifiedTime: string;
+    webViewLink: string;
+  }[]
+> {
   try {
     const response = await fetch(
       `${DRIVE_API_URL}/files?orderBy=modifiedTime desc&fields=files(id,name,mimeType,createdTime,modifiedTime,webViewLink)`,
@@ -95,121 +106,118 @@ export async function getGoogleDriveFile(
   }
 }
 
-// Upload to Google Drive
 // Upload to Google Drive with fallback method
 export async function uploadToGoogleDrive(
   content: string,
   fileName: string,
   accessToken: string
-): Promise<{ id: string; name: string; mimeType: string; webViewLink?: string }> {
+): Promise<{
+  id: string;
+  name: string;
+  mimeType: string;
+  webViewLink?: string;
+}> {
   try {
-    // Try direct URL instead of using environment variables
-    const apiUrl = "https://www.googleapis.com/drive/v3";
-    
     try {
       // First attempt: Create file using 2-step method
-      console.log("Creating Google Drive file using 2-step method");
-      
+
       // Step 1: Create empty file with metadata
-      const createResponse = await fetch(`${apiUrl}/files?fields=id,name,mimeType,webViewLink`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: fileName,
-          mimeType: "text/html",
-        }),
-      });
+      const createResponse = await fetch(
+        `${DRIVE_API_URL}/files?fields=id,name,mimeType,webViewLink`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: fileName,
+            mimeType: "text/html",
+          }),
+        }
+      );
 
       if (!createResponse.ok) {
-        const errorText = await createResponse.text();
-        console.error("Failed to create file:", errorText);
         throw new Error(`Failed to create file: ${createResponse.status}`);
       }
 
       const fileData = await createResponse.json();
-      console.log("File created:", fileData);
-      
+
       // Step 2: Update with content
       const updateResponse = await fetch(
-        `https://www.googleapis.com/upload/drive/v3/files/${fileData.id}?uploadType=media`,
+        `${DRIVE_UPLOAD_API_URL}/files/${fileData.id}?uploadType=media`,
         {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'text/html',
+            "Content-Type": "text/html",
           },
           body: content,
         }
       );
 
       if (!updateResponse.ok) {
-        const updateErrorText = await updateResponse.text();
-        console.error("Failed to update file content:", updateErrorText);
-        throw new Error(`Failed to update file content: ${updateResponse.status}`);
+        throw new Error(
+          `Failed to update file content: ${updateResponse.status}`
+        );
       }
-      
+
       // Get the updated file with webViewLink
       const getResponse = await fetch(
-        `${apiUrl}/files/${fileData.id}?fields=id,name,mimeType,webViewLink`,
+        `${DRIVE_API_URL}/files/${fileData.id}?fields=id,name,mimeType,webViewLink`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         }
       );
-      
+
       if (!getResponse.ok) {
         throw new Error(`Failed to get updated file: ${getResponse.status}`);
       }
-      
+
       return await getResponse.json();
+    } catch {
       
-    } catch (firstAttemptError) {
-      console.error("First attempt method failed:", firstAttemptError);
-      
-      // Second attempt: Try with simpler approach
-      console.log("Trying alternative upload method");
-      
-      // Create a simple text file
-      const simpleResponse = await fetch(`${apiUrl}/files?fields=id,name,mimeType,webViewLink`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: `${fileName}.txt`,
-          mimeType: "text/plain",
-        }),
-      });
-      
+      const simpleResponse = await fetch(
+        `${DRIVE_API_URL}/files?fields=id,name,mimeType,webViewLink`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: `${fileName}.txt`,
+            mimeType: "text/plain",
+          }),
+        }
+      );
+
       if (!simpleResponse.ok) {
-        const simpleErrorText = await simpleResponse.text();
-        console.error("Failed with simplified method:", simpleErrorText);
         throw new Error(`All upload methods failed`);
       }
-      
+
       return await simpleResponse.json();
     }
   } catch (error) {
-    console.error("Error uploading to Google Drive:", error);
+    console.log("Error uploading to Google Drive:", error);
     throw error;
   }
 }
 
-// Convert to Google Docs
-// Convert to Google Docs
 export async function convertToGoogleDocs(
   fileId: string,
   accessToken: string
-): Promise<{ id: string; name: string; mimeType: string; webViewLink?: string }> {
+): Promise<{
+  id: string;
+  name: string;
+  mimeType: string;
+  webViewLink?: string;
+}> {
   try {
-    // Use direct URL instead of environment variable
     const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${fileId}/copy?fields=id,name,mimeType,webViewLink`,
+      `${DRIVE_API_URL}/files/${fileId}/copy?fields=id,name,mimeType,webViewLink`,
       {
         method: "POST",
         headers: {
@@ -223,16 +231,13 @@ export async function convertToGoogleDocs(
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Google Docs conversion error:", errorText);
-      throw new Error(`Google Drive API error (${response.status}): ${errorText}`);
+      throw new Error(`Google Drive API error (${response.status})`);
     }
 
     const result = await response.json();
-    console.log("Conversion successful:", result);
     return result;
   } catch (error) {
-    console.error("Error converting to Google Docs:", error);
+    console.log("Error converting to Google Docs:", error);
     throw error;
   }
 }
