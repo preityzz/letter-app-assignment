@@ -43,7 +43,7 @@ export default function DriveExportButton({
 
       setStatus("success");
     } catch (error) {
-      console.error("Error exporting to Drive:", error);
+      console.log("Error exporting to Drive:", error);
       setStatus("error");
     }
   };

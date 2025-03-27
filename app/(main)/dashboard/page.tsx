@@ -47,7 +47,7 @@ export default function Dashboard() {
 
           setLetters(userLetters);
         } catch (error) {
-          console.error("Error fetching letters:", error);
+          console.log("Error fetching letters:", error);
         } finally {
           setLoading(false);
         }

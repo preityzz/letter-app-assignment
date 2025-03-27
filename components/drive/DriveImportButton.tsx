@@ -26,17 +26,12 @@ export default function DriveImportButton({
     try {
       setLoading(true);
 
-      // Get fresh access token
       const accessToken = await getGoogleDriveToken();
 
-      // Get file content
       const content = await getGoogleDriveFile(fileId, accessToken);
 
-      // Save as a new letter in Firestore
       const user = auth.currentUser;
       if (!user) {
-        // add a toaster think of the case when user directly enter this page by url
-        // show a toaster or redirect to login
         throw new Error("User not authenticated");
       }
 
@@ -54,7 +49,7 @@ export default function DriveImportButton({
       // Navigate to editor with the new letter ID
       router.push(`/editor/${docRef.id}`);
     } catch (error) {
-      console.error("Error importing from Drive:", error);
+      console.log("Error importing from Drive:", error);
       alert("Failed to import document from Drive");
     } finally {
       setLoading(false);

@@ -62,11 +62,10 @@ This system provides an intuitive interface for letter writing, formatting, and 
 
   ## Install dependencies
    
+    ```bash
   npm install
-# or
-  yarn install
-# or
-  pnpm install
+  ```
+
  
 
 2. Environment Configuration
