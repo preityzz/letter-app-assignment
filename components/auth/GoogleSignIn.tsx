@@ -1,14 +1,14 @@
 "use client";
 
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
 } from "firebase/auth";
-import { auth, db } from "@/firebase/client"; 
-import { doc, setDoc, getDoc } from "firebase/firestore"; 
+import { auth, db } from "@/firebase/client";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import {
   Loader2,
   AlertTriangle,
@@ -27,15 +27,15 @@ export default function GoogleSignIn() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-   useEffect(() => {
-     const unsubscribe = onAuthStateChanged(auth, (user) => {
-       if (user) {
-         router.push("/dashboard");
-       }
-     });
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push("/dashboard");
+      }
+    });
 
-     return () => unsubscribe(); 
-   }, [router]);
+    return () => unsubscribe();
+  }, [router]);
 
   const handleSignIn = async () => {
     try {
@@ -48,7 +48,7 @@ export default function GoogleSignIn() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      const userDocRef = doc(db, "users", user.uid); 
+      const userDocRef = doc(db, "users", user.uid);
       await setDoc(userDocRef, {
         name: user.displayName,
         email: user.email,
@@ -56,7 +56,6 @@ export default function GoogleSignIn() {
         createdAt: new Date().toISOString(),
       });
 
-      // Optional: Fetch user data to confirm it was saved
       const userDoc = await getDoc(userDocRef);
       if (userDoc.exists()) {
         console.log("User data:", userDoc.data());
@@ -95,7 +94,6 @@ export default function GoogleSignIn() {
   );
 }
 
-// Component for error message
 function ErrorMessage({ error }: { error: string | null }) {
   if (!error) return null;
 
@@ -138,7 +136,6 @@ function SignInButton({
   );
 }
 
-
 function FeatureBadges() {
   return (
     <div className="flex items-center gap-2 pt-2">
@@ -161,10 +158,6 @@ function FeatureBadges() {
 function FeatureSection() {
   return (
     <CardFooter className="flex-col space-y-6 pt-6 px-0">
-      <p className="text-sm text-center text-gray-500 px-6">
-        By continuing, you agree to our Terms of Service and Privacy Policy
-      </p>
-
       <div className="space-y-4 w-full">
         <h3 className="text-sm font-medium text-gray-700 text-center">
           What you&apos;ll be able to do:
@@ -187,7 +180,6 @@ function FeatureSection() {
     </CardFooter>
   );
 }
-
 
 function FeatureCard({
   icon,

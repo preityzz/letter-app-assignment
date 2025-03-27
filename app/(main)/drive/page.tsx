@@ -25,28 +25,28 @@ export default function DrivePage() {
     return () => unsubscribe();
   }, [router]);
 
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-6">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="sm">
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Button>
-        </Link>
-      </div>
+    <>
+      {loading ? (
+        <div className="h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="mb-6">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm">
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            </Link>
+          </div>
 
-      <h1 className="text-2xl font-bold mb-8">Google Drive Documents</h1>
+          <h1 className="text-2xl font-bold mb-8">Google Drive Documents</h1>
 
-      <DriveDocsList />
-    </div>
+          <DriveDocsList />
+        </div>
+      )}
+    </>
   );
 }

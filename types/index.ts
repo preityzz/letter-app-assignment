@@ -13,6 +13,7 @@ export interface DriveUploadResponse {
   mimeType: string;
   webViewLink?: string;
 }
+
 export interface User {
   uid: string;
   email: string | null;
@@ -20,7 +21,6 @@ export interface User {
   photoURL: string | null;
 }
 
-// Letter related types
 export interface Letter {
   id: string;
   title: string;
@@ -33,7 +33,6 @@ export interface Letter {
   tags?: string[];
 }
 
-// Editor related types
 export interface EditorProps {
   documentId?: string;
   initialContent?: string;
@@ -42,43 +41,24 @@ export interface EditorProps {
 }
 
 export interface ToolbarProps {
-  editor: import("@tiptap/core").Editor; // Tiptap editor instance
+  editor: import("@tiptap/core").Editor;
   isSaving: boolean;
   onSave: () => Promise<void>;
   onSaveToDrive: () => Promise<void>;
 }
 
-// Google Drive related types
-export interface DriveFile {
-  id: string;
-  name: string;
-  mimeType: string;
-  createdTime: string;
-  modifiedTime: string;
-}
-
-export interface DriveUploadResponse {
-  id: string;
-  name: string;
-  mimeType: string;
-  webViewLink?: string;
-}
-
-// Authentication related types
 export interface AuthState {
   user: User | null;
   loading: boolean;
   error: string | null;
 }
 
-// API response types
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
 }
 
-// Form related types
 export interface FormField {
   name: string;
   label: string;
@@ -88,19 +68,17 @@ export interface FormField {
   options?: { value: string; label: string }[];
 }
 
-// Settings related types
 export interface UserSettings {
   userId: string;
   theme: "light" | "dark" | "system";
   fontSize: "small" | "medium" | "large";
   autosaveEnabled: boolean;
-  autosaveInterval: number; // in seconds
+  autosaveInterval: number;
 }
 
-// Notification related types
 export interface Notification {
   id: string;
   type: "info" | "success" | "warning" | "error";
   message: string;
-  duration?: number; // in milliseconds
+  duration?: number;
 }

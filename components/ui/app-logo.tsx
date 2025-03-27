@@ -1,17 +1,11 @@
 import { MessageCircle } from "lucide-react";
 
-interface AppLogoProps {
-  className?: string;
-}
-
-export function AppLogo({ className = "w-12 h-12" }: AppLogoProps) {
+export function AppLogo() {
   return (
     <div
-      className={`bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white ${className}`}
+      className={`bg-gradient-to-r w-20 h-20  from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white`}
     >
-      <MessageCircle
-        size={Math.floor(parseInt(className.split("w-")[1]) * 0.6)}
-      />
+      <MessageCircle className="flex w-10 h-10 justify-center items-center" />
     </div>
   );
 }

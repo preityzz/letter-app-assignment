@@ -30,8 +30,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center space-y-6">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
+        <div className="text-center space-y-4">
           <WelcomeHeader />
           <GoogleSignIn />
           <TermsAndPrivacy />
@@ -40,7 +40,6 @@ export default function Home() {
     </div>
   );
 }
-
 
 function LoadingScreen() {
   return (
@@ -52,8 +51,8 @@ function LoadingScreen() {
 
 function WelcomeHeader() {
   return (
-    <div className="space-y-3">
-      <AppLogo className="w-16 h-16 mx-auto" />
+    <div className="space-y-3 flex flex-col justify-center items-center">
+      <AppLogo />
       <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
       <p className="text-gray-600">
         Sign in to access your documents and continue your work

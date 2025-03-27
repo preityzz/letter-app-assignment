@@ -16,12 +16,11 @@ import DriveImportButton from "@/components/drive/DriveImportButton";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase/client";
 
-
 const DRIVE_API_URL =
   process.env.NEXT_PUBLIC_GOOGLE_DRIVE_API_URL ||
   "https://www.googleapis.com/drive/v3";
-const DOCS_URL =
-  process.env.NEXT_PUBLIC_GOOGLE_DOCS_URL || "https://docs.google.com/document";
+const DOCS_BASE_URL =
+  process.env.NEXT_PUBLIC_GOOGLE_DOCS_URL || "https://docs.google.com";
 
 export default function DriveFilePage() {
   const params = useParams();
@@ -30,6 +29,8 @@ export default function DriveFilePage() {
     params && typeof params.fileId === "string" ? params.fileId : "";
   const [content, setContent] = useState("");
   const [fileName, setFileName] = useState("");
+  const [mimeType, setMimeType] = useState("");
+  const [webViewLink, setWebViewLink] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -46,6 +47,37 @@ export default function DriveFilePage() {
     return () => unsubscribe();
   }, [router]);
 
+  const getDocumentUrl = () => {
+    if (webViewLink) {
+      if (webViewLink.includes("/edit")) {
+        return webViewLink;
+      } else {
+        return webViewLink.endsWith("/")
+          ? `${webViewLink}edit`
+          : `${webViewLink}/edit`;
+      }
+    }
+
+    switch (mimeType) {
+      case "application/vnd.google-apps.document":
+        return `${DOCS_BASE_URL}/document/d/${fileId}/edit`;
+      case "application/vnd.google-apps.spreadsheet":
+        return `${DOCS_BASE_URL}/spreadsheets/d/${fileId}/edit`;
+      case "application/vnd.google-apps.presentation":
+        return `${DOCS_BASE_URL}/presentation/d/${fileId}/edit`;
+      case "application/vnd.google-apps.drawing":
+        return `${DOCS_BASE_URL}/drawings/d/${fileId}/edit`;
+      case "application/vnd.google-apps.form":
+        return `${DOCS_BASE_URL}/forms/d/${fileId}/edit`;
+      case "text/html":
+      case "text/plain":
+      case "application/rtf":
+        return `https://docs.google.com/document/d/${fileId}/edit`;
+      default:
+        return `https://drive.google.com/file/d/${fileId}/edit`;
+    }
+  };
+
   useEffect(() => {
     const fetchFileContent = async () => {
       try {
@@ -56,9 +88,8 @@ export default function DriveFilePage() {
 
         const accessToken = await getGoogleDriveToken();
 
-        // Get file metadata to get the filename
         const response = await fetch(
-          `${DRIVE_API_URL}/files/${fileId}?fields=name,mimeType,webViewLink`,
+          `${DRIVE_API_URL}/files/${fileId}?fields=name,mimeType,webViewLink,capabilities`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -72,9 +103,19 @@ export default function DriveFilePage() {
         }
 
         const data = await response.json();
-        setFileName(data.name);
+        setFileName(data.name || "Untitled");
+        setMimeType(data.mimeType || "");
 
-        // Now get the file content
+        if (data.webViewLink) {
+          let editLink = data.webViewLink;
+          if (!editLink.includes("/edit")) {
+            editLink = editLink.endsWith("/")
+              ? `${editLink}edit`
+              : `${editLink}/edit`;
+          }
+          setWebViewLink(editLink);
+        }
+
         try {
           const fileContent = await getGoogleDriveFile(fileId, accessToken);
           setContent(fileContent);
@@ -111,6 +152,8 @@ export default function DriveFilePage() {
     );
   }
 
+  const documentUrl = getDocumentUrl();
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6 flex justify-between items-center">
@@ -122,14 +165,17 @@ export default function DriveFilePage() {
         </Link>
 
         <div className="flex gap-2">
-          <a
-            href={`${DOCS_URL}/${fileId}/edit`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={documentUrl} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm">
               <ExternalLink className="h-4 w-4 mr-2" />
-              Open in Google Docs
+              Edit in Google{" "}
+              {mimeType.includes("spreadsheet")
+                ? "Sheets"
+                : mimeType.includes("presentation")
+                ? "Slides"
+                : mimeType.includes("form")
+                ? "Forms"
+                : "Docs"}
             </Button>
           </a>
 
@@ -146,12 +192,12 @@ export default function DriveFilePage() {
             <div>
               <p className="text-yellow-800">{error}</p>
               <a
-                href={`${DOCS_URL}/${fileId}/edit`}
+                href={documentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline mt-2 inline-block"
               >
-                Open this document in Google Docs
+                Edit this document in Google Drive
               </a>
             </div>
           </div>

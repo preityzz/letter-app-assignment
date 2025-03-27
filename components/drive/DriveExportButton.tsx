@@ -27,17 +27,16 @@ export default function DriveExportButton({
  
       const accessToken = await getGoogleDriveToken();
 
-      // Upload HTML content
+     
       const uploadResult = await uploadToGoogleDrive(
         content,
         title,
         accessToken
       );
 
-      // Convert to Google Docs format
+ 
       const docResult = await convertToGoogleDocs(uploadResult.id, accessToken);
 
-      // Store the web view link
       if (docResult.webViewLink) {
         setDocUrl(docResult.webViewLink);
       }

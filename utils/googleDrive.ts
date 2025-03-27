@@ -5,10 +5,7 @@ const DRIVE_UPLOAD_API_URL =
   process.env.NEXT_PUBLIC_GOOGLE_DRIVE_UPLOAD_API_URL ||
   "https://www.googleapis.com/upload/drive/v3";
 
-// List files from Google Drive
-export async function listGoogleDriveFiles(
-  accessToken: string
-): Promise<
+export async function listGoogleDriveFiles(accessToken: string): Promise<
   {
     id: string;
     name: string;
@@ -40,13 +37,11 @@ export async function listGoogleDriveFiles(
   }
 }
 
-// Get file content from Google Drive
 export async function getGoogleDriveFile(
   fileId: string,
   accessToken: string
 ): Promise<string> {
   try {
-    // First, get the file metadata to check its mimeType
     const metadataResponse = await fetch(
       `${DRIVE_API_URL}/files/${fileId}?fields=mimeType,name`,
       {
@@ -69,10 +64,8 @@ export async function getGoogleDriveFile(
 
     let response;
 
-    // Check if it's a Google Docs format file
     if (metadata.mimeType === "application/vnd.google-apps.document") {
       console.log("This is a Google Docs file - using export");
-      // For Google Docs, we need to export it
       response = await fetch(
         `${DRIVE_API_URL}/files/${fileId}/export?mimeType=text/html`,
         {
@@ -83,7 +76,6 @@ export async function getGoogleDriveFile(
       );
     } else {
       console.log("This is a regular file - downloading directly");
-      // For regular files, we can download directly
       response = await fetch(`${DRIVE_API_URL}/files/${fileId}?alt=media`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -106,7 +98,6 @@ export async function getGoogleDriveFile(
   }
 }
 
-// Upload to Google Drive with fallback method
 export async function uploadToGoogleDrive(
   content: string,
   fileName: string,
@@ -119,9 +110,6 @@ export async function uploadToGoogleDrive(
 }> {
   try {
     try {
-      // First attempt: Create file using 2-step method
-
-      // Step 1: Create empty file with metadata
       const createResponse = await fetch(
         `${DRIVE_API_URL}/files?fields=id,name,mimeType,webViewLink`,
         {
@@ -143,7 +131,6 @@ export async function uploadToGoogleDrive(
 
       const fileData = await createResponse.json();
 
-      // Step 2: Update with content
       const updateResponse = await fetch(
         `${DRIVE_UPLOAD_API_URL}/files/${fileData.id}?uploadType=media`,
         {
@@ -162,7 +149,6 @@ export async function uploadToGoogleDrive(
         );
       }
 
-      // Get the updated file with webViewLink
       const getResponse = await fetch(
         `${DRIVE_API_URL}/files/${fileData.id}?fields=id,name,mimeType,webViewLink`,
         {
@@ -178,7 +164,6 @@ export async function uploadToGoogleDrive(
 
       return await getResponse.json();
     } catch {
-      
       const simpleResponse = await fetch(
         `${DRIVE_API_URL}/files?fields=id,name,mimeType,webViewLink`,
         {
@@ -206,7 +191,6 @@ export async function uploadToGoogleDrive(
   }
 }
 
-// Convert to Google Docs
 export async function convertToGoogleDocs(
   fileId: string,
   accessToken: string
@@ -233,21 +217,21 @@ export async function convertToGoogleDocs(
 
     if (!response.ok) {
       const errorResponse = await response.text();
-      console.error("Google Docs conversion error:", errorResponse);
-      throw new Error(`Google Drive API error (${response.status}): ${errorResponse}`);
+      console.log("Google Docs conversion error:", errorResponse);
+      throw new Error(
+        `Google Drive API error (${response.status}): ${errorResponse}`
+      );
     }
 
     const result = await response.json();
-    
-    // Explicitly format the webViewLink to ensure it's correct
+
     if (result.id) {
-      // Create a correctly formatted Google Docs URL
       result.webViewLink = `https://docs.google.com/document/d/${result.id}/edit`;
     }
-    
+
     return result;
   } catch (error) {
-    console.error("Error converting to Google Docs:", error);
+    console.log("Error converting to Google Docs:", error);
     throw error;
   }
 }
