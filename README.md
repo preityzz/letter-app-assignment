@@ -1,5 +1,5 @@
 Letter App
-<div align="center"><strong>Modern Letter Creation Tool with Google Drive Integration</strong></div> <div align="center">Built with Next.js 14 App Router</div> <br /> <div align="center"> <a href="https://letter-app-demo.vercel.app/">View Demo</a> <span>
+<div align="center"><strong>Modern Letter Creation Tool with Google Drive Integration</strong></div> <div align="center">Built with Next.js 14 App Router</div> <br /> <div align="center"> <a href="https://letter-app-assignment.vercel.app/">View Demo</a> <span>
 <img alt="Letter App Screenshot" src="letter app.png">
 </div>
 
@@ -50,35 +50,37 @@ This system provides an intuitive interface for letter writing, formatting, and 
 1. Setup Project
   ## Clone repository
   ```bash
-  -git clone https://github.com/preityzz/KAM
+  -git clone https://github.com/preityzz/letter-app-assignment
   ```
 
   ## Change Directory:
   
- cd letter-app
+  ```bash
+  cd letter-app
+  ```
    
 
   ## Install dependencies
    
   npm install
 # or
-yarn install
+  yarn install
 # or
-pnpm install
+  pnpm install
  
 
 2. Environment Configuration
   ## Create .env.local file
- cp .env.example .env.local
+  .env.local
 
-  ## Update .env with your values
-NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
-NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
+  ### Update .env with your values
+- NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+- NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+- NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+- NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+- NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+- NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+- NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
 
 3. Firebase Setup
 
@@ -106,7 +108,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
 
 ## Development Server
  ```bash
-   npm run dev
+npm run dev
 # or
 yarn dev
 # or
